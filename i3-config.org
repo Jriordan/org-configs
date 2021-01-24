@@ -1,0 +1,339 @@
+#+title: i3 Configuration
+#+PROPERTY: header-args :tangle /home/jon/.config/i3/config :mkdirp yes
+
+* Tips for use
+In this document I've added links in many places that lead you to documentation for the various packages we use.  If you're looking at this file in Emacs, you can put your cursor on a link and press =C-c C-o= or run =M-x org-open-at-point= to open the link in your web browser. [[https://i3wm.org/docs/userguide.html][I3 docs]]
+
+* Header
+Needed to make sure that i3 reads this file with the new format version
+
+#+begin_src shell
+
+# i3 config file (v4)
+
+#+end_src
+
+* Keybindings
+** Modifier Key
+Mod1 = Alt Key
+Mod4 = Windows key
+
+#+begin_src sh
+
+set $mod Mod4
+
+#+end_src
+
+** Volume Control
+
+#+begin_src shell
+
+# Use pactl to adjust volume in PulseAudio.
+set $refresh_i3status killall -SIGUSR1 i3status
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
+bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+
+#+end_src
+
+** Start a Terminal
+
+#+begin_src shell
+
+bindsym $mod+Return exec terminology
+
+#+end_src
+
+** Kill Active Window
+
+#+begin_src shell
+
+# kill focused window
+bindsym $mod+Shift+q kill
+
+#+end_src
+
+** Movement Keys
+
+#+begin_src shell
+
+# change focus
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+# alternatively, you can use the cursor keys:
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+# move focused window
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+
+# alternatively, you can use the cursor keys:
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+#+end_src
+
+** Fullscreen Toggle
+
+#+begin_src shell
+
+# enter fullscreen mode for the focused container
+bindsym $mod+f fullscreen toggle
+
+#+end_src
+
+** Split Directions
+
+#+begin_src shell
+
+# split in horizontal orientation
+bindsym $mod+Shift+v split h
+
+# split in vertical orientation
+bindsym $mod+v split v
+
+#+end_src
+
+** Focus on Parent
+
+#+begin_src shell
+
+# focus the parent container
+bindsym $mod+a focus parent
+
+#+end_src
+
+** Switching Workspaces
+
+#+begin_src shell
+
+# Define names for default workspaces for which we configure key bindings later on.
+# We use variables to avoid repeating the names in multiple places.
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9"
+set $ws10 "10"
+
+# switch to workspace
+bindsym $mod+1 workspace number $ws1
+bindsym $mod+2 workspace number $ws2
+bindsym $mod+3 workspace number $ws3
+bindsym $mod+4 workspace number $ws4
+bindsym $mod+5 workspace number $ws5
+bindsym $mod+6 workspace number $ws6
+bindsym $mod+7 workspace number $ws7
+bindsym $mod+8 workspace number $ws8
+bindsym $mod+9 workspace number $ws9
+bindsym $mod+0 workspace number $ws10
+
+# move focused container to workspace
+bindsym $mod+Shift+1 move container to workspace number $ws1
+bindsym $mod+Shift+2 move container to workspace number $ws2
+bindsym $mod+Shift+3 move container to workspace number $ws3
+bindsym $mod+Shift+4 move container to workspace number $ws4
+bindsym $mod+Shift+5 move container to workspace number $ws5
+bindsym $mod+Shift+6 move container to workspace number $ws6
+bindsym $mod+Shift+7 move container to workspace number $ws7
+bindsym $mod+Shift+8 move container to workspace number $ws8
+bindsym $mod+Shift+9 move container to workspace number $ws9
+bindsym $mod+Shift+0 move container to workspace number $ws10
+
+#+end_src
+
+** Reload Configuration File
+
+#+begin_src shell
+
+# reload the configuration file
+bindsym $mod+Shift+c reload
+# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+bindsym $mod+Shift+r restart
+
+#+end_src
+
+** Rofi (Application Launcher)
+
+#+begin_src shell
+
+bindsym $mod+space exec rofi -show run
+bindsym $mod+shift+space exec rofi -show combi
+
+#+end_src
+
+** Jump to Urgent Window
+
+#+begin_src shell
+bindsym $mod+x [urgent=latest] focus
+#+end_src
+
+* Modes
+** Shutdown/Reboot/Lock Screen
+
+Assumes `polkit` is installed to allow unpriveled users to run power management commands
+
+#+begin_src shell
+
+set $Locker betterlockscreen -l dim && sleep 1
+
+set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
+
+mode "$mode_system" {
+  bindsym l exec --no-startup-id $Locker, mode "default"
+  bindsym e exec --no-startup-id i3-msg exit, mode "default"
+  bindsym s exec --no-startup-id $Locker && systemctl suspend, mode "default"
+  bindsym h exec --no-startup-id $Locker && systemctl hibernate, mode "default"
+  bindsym r exec --no-startup-id systemctl reboot, mode"default"
+  bindsym Shift+s exec --no-startup-id systemctl poweroff -i, mode "default"
+
+  # back to normal: Enter or Escape
+  bindsym Return mode "default"
+  bindsym Escape mode "default"
+}
+
+bindsym $Mod+Pause mode "$mode_system"
+
+#+end_src
+
+** Resize
+
+#+begin_src shell
+
+# resize window (you can also use the mouse for that)
+mode "resize" {
+        # These bindings trigger as soon as you enter the resize mode
+
+        # Pressing left will shrink the window’s width.
+        # Pressing right will grow the window’s width.
+        # Pressing up will shrink the window’s height.
+        # Pressing down will grow the window’s height.
+        bindsym j resize shrink width 10 px or 10 ppt
+        bindsym k resize grow height 10 px or 10 ppt
+        bindsym l resize shrink height 10 px or 10 ppt
+        bindsym semicolon resize grow width 10 px or 10 ppt
+
+        # same bindings, but for the arrow keys
+        bindsym Left resize shrink width 10 px or 10 ppt
+        bindsym Down resize grow height 10 px or 10 ppt
+        bindsym Up resize shrink height 10 px or 10 ppt
+        bindsym Right resize grow width 10 px or 10 ppt
+
+        # back to normal: Enter or Escape or $mod+r
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+        bindsym $mod+r mode "default"
+}
+
+bindsym $mod+r mode "resize"
+
+#+end_src
+
+* UI
+** Font
+Font for window titles. Will also be used by the bar unless a different font is used in the bar {} block below.
+
+#+begin_src shell
+
+font pango:Fira Code Retina 12
+
+#+end_src
+
+** Remove Edge Borders
+Only remove the edge borders if there is a single window, otherwise put them back in
+
+#+begin_src shell
+
+hide_edge_borders smart
+
+#+end_src
+
+** Move Between Previous Workspace
+Move back and forth between the previous workspace and the current one by hitting the same workspace key over
+
+#+begin_src shell
+
+workspace_auto_back_and_forth yes
+
+#+end_src
+
+** Remove Titles from Windows
+little cheat to get rid of the titles from windows
+
+#+begin_src shell
+
+new_window 1pixel
+
+#+end_src
+
+* Programs
+External programs being run by i3
+** Set Background Image
+
+#+begin_src shell
+
+exec /home/jon/.fehbg
+
+#+end_src
+
+** Automatic Screen Locking
+Helper shell script to make it easier to interact with the more complex command
+
+#+begin_src shell :tangle /home/jon/.config/i3/xidlehook-launch.sh :shebang "#!/bin/bash" :mkdirp yes
+
+# Terminate already running xidlehook instances
+killall -q xidlehook
+
+# Wait until the process have been shut down
+while pgrep -u $UID -x xidlehook >/dev/null; do sleep 1; done
+
+# Launch xidlehook with betterlockscreen
+xidlehook --not-when-audio --not-when-fullscreen --timer 600 "betterlockscreen -l dim" "" &
+
+#+end_src
+
+And this is the bit that goes into the i3 file to make this work
+
+#+begin_src shell
+
+exec_always --no-startup-id $HOME/.config/i3/xidlehook-launch.sh
+
+#+end_src
+
+** Status Bar
+
+
+#+begin_src shell :tangle /home/jon/.config/polybar/polybar-launch.sh :shebang "#!/bin/bash" :mkdirp yes
+
+# Terminate already running xidlehook instances
+killall -q polybar
+
+# Wait until the process have been shut down
+while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
+
+# Launch xidlehook with betterlockscreen
+polybar my-bar &
+
+#+end_src
+
+#+begin_src shell
+
+exec_always --no-startup-id $HOME/.config/polybar/polybar-launch.sh
+
+#+end_src
+
